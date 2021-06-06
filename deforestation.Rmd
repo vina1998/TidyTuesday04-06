@@ -1,0 +1,81 @@
+---
+title: "deforestation"
+author: "Vina"
+date: "18/04/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(gapminder)
+soybean_use <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-04-06/soybean_use.csv')
+
+```
+
+```{r, echo=FALSE}
+soybean_use$entity <- gapminder$country[match(soybean_use$entity, gapminder$country)] 
+
+gapminder$country <- soybean_use$entity[match(gapminder$country, soybean_use$entity)] 
+
+soybean_use <- soybean_use %>% drop_na()
+
+soybean_use %>% 
+    ggplot(aes(year,human_food)) +
+    stat_summary(fun = mean, geom = "line", colour = "green" ) +
+    stat_summary(aes(year,animal_feed), soybean_use, fun = mean, geom = "line", colour = "black")
+
+soybean_use %>% 
+    ggplot(aes(year,human_food)) +
+    stat_summary(fun = mean, geom = "line", colour = "green" ) +
+    stat_summary(aes(year,animal_feed), soybean_use, fun = mean, geom = "line", colour = "black") + stat_summary(aes(year,gdpPercap), gapminder, fun = mean, geom = "line", colour = "red") + stat_summary(aes(year,lifeExp), gapminder, fun = mean, geom = "line", colour = "blue") + scale_y_continuous(labels = scales::comma) 
+```
+
+
+by country
+
+
+```{r,echo=FALSE}
+soybean_use %>% 
+    ggplot(aes(year,human_food, colour= entity)) +
+    stat_summary(fun = mean, geom = "line")
+
+soybean_use %>% 
+    ggplot(aes(year,animal_feed, colour= entity)) +
+    stat_summary(fun = mean, geom = "line")
+```
+
+```{r, echo=FALSE}
+
+#remove china?
+filtered_soy <- soybean_use %>% filter(entity!= "China")
+filtered_gapminder <- gapminder %>% filter(country!= "China")
+
+filtered_soy %>% 
+    ggplot(aes(year,human_food, colour= entity)) +
+    stat_summary(fun = mean, geom = "line")
+
+filtered_soy %>% 
+    ggplot(aes(year,animal_feed, colour= entity)) +
+    stat_summary(fun = mean, geom = "line")
+
+
+
+filtered_soy %>% 
+    ggplot(aes(year,human_food)) +
+    stat_summary(fun = mean, geom = "line", colour = "green" ) +
+    stat_summary(aes(year,animal_feed), filtered_soy, fun = mean, geom = "line", colour = "black") + stat_summary(aes(year,gdpPercap), filtered_gapminder, fun = mean, geom = "line", colour = "red") + stat_summary(aes(year,lifeExp), filtered_gapminder, fun = mean, geom = "line", colour = "blue")+ scale_y_continuous(labels = scales::comma) 
+
+
+```
+
+what's goin on in China? seems to be a negative trend to before 
+
+```{r,echo=FALSE}
+China_soy <- soybean_use %>% filter(entity== "China")
+China_gapminder <- gapminder %>% filter(country== "China")
+
+China_soy %>% 
+    ggplot(aes(year,human_food)) +
+    stat_summary(fun = mean, geom = "line", colour = "green" ) +
+    stat_summary(aes(year,animal_feed), China_soy, fun = mean, geom = "line", colour = "black") + stat_summary(aes(year,gdpPercap), China_gapminder, fun = mean, geom = "line", colour = "red") + stat_summary(aes(year,lifeExp), China_gapminder, fun = mean, geom = "line", colour = "blue")+ scale_y_continuous(labels = scales::comma)
+```
